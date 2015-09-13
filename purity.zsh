@@ -54,11 +54,21 @@ prompt_purity_string_length() {
 	echo ${#${(S%%)1//(\%([KF1]|)\{*\}|\%[Bbkf])}}
 }
 
+# oh-my-zsh themes/fishy's path shortening to 1 letter per directory
+_fishy_collapsed_wd() {
+  echo $(pwd | perl -pe "
+   BEGIN {
+      binmode STDIN,  ':encoding(UTF-8)';
+      binmode STDOUT, ':encoding(UTF-8)';
+   }; s|^$HOME|~|g; s|/([^/])[^/]*(?=/)|/\$1|g
+")
+} 
+
 prompt_purity_precmd() {
 	# shows the full path in the title
 	print -Pn '\e]0;%~\a'
 
-	local prompt_purity_preprompt="%c$(git_prompt_info) $(git_prompt_status)"
+	local prompt_purity_preprompt="$(_fishy_collapsed_wd)$(git_prompt_info) $(git_prompt_status)"
 	print -P ' %F{yellow}`prompt_purity_cmd_exec_time`%f'
 
 	# check async if there is anything to pull
@@ -109,7 +119,7 @@ prompt_purity_setup() {
 	ZSH_THEME_GIT_PROMPT_UNTRACKED="%F{cyan}✩%f "
 
 	# prompt turns red if the previous command didn't exit with 0
-	PROMPT='%F{blue}%c$(git_prompt_info) $(git_prompt_status) %(?.%F{green}.%F{red})❯%f '
+	PROMPT='%F{blue}$(_fishy_collapsed_wd)$(git_prompt_info) $(git_prompt_status)%(?.%F{green}.%F{red})❯%f '
 	RPROMPT='%F{red}%(?..⏎)%f'
 }
 
